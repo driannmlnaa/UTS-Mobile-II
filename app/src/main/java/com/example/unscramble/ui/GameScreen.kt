@@ -116,6 +116,15 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
                     fontSize = 16.sp
                 )
             }
+            OutlinedButton(
+                onClick = { gameViewModel.skipWord() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.history),
+                    fontSize = 16.sp
+                )
+            }
         }
 
         GameStatus(score = gameUiState.score, modifier = Modifier.padding(20.dp))
