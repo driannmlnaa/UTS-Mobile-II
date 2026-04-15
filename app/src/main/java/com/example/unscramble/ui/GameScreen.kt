@@ -57,11 +57,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unscramble.R
 import com.example.unscramble.ui.theme.UnscrambleTheme
+import com.example.unscramble.ui.GameViewModel
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.unscramble.data.HistoryEntity
 
 @Composable
-fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
+fun GameScreen(gameViewModel: GameViewModel = viewModel(factory = GameViewModel.Factory)) {
     val gameUiState by gameViewModel.uiState.collectAsState()
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
+    val historyList by gameViewModel.historyList.collectAsState()
+    var showHistoryDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -117,7 +124,7 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
                 )
             }
             OutlinedButton(
-                onClick = { gameViewModel.skipWord() },
+                onClick = { showHistoryDialog = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -133,6 +140,13 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
             FinalScoreDialog(
                 score = gameUiState.score,
                 onPlayAgain = { gameViewModel.resetGame() }
+            )
+        }
+
+        if (showHistoryDialog) {
+            HistoryDialog(
+                historyList = historyList,
+                onDismiss = { showHistoryDialog = false }
             )
         }
     }
@@ -265,4 +279,29 @@ fun GameScreenPreview() {
     UnscrambleTheme {
         GameScreen()
     }
+}
+
+@Composable
+private fun HistoryDialog(
+    historyList: List<HistoryEntity>,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("History") },
+        text = {
+            Column {
+                historyList.forEachIndexed { index, item ->
+                    Text(
+                        text = "${item.word}"
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
 }
